@@ -1,6 +1,6 @@
 [project]
 name = "csig"
-version = "0.1.0"
+version = "0.1.1"
 description = "Implementation of AWS Signature Version 4"
 readme = "README.md"
 requires-python = ">=3.8"
