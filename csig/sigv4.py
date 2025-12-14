@@ -122,6 +122,8 @@ def _canonical_query_string(url: str) -> str:
     if not parts.query:
         return ''
 
+    # The query parameters are first URI-encoded...
+    # see: https://github.com/boto/botocore/blob/1.42.9/botocore/auth.py#L261-L276
     queries = []
     for key, values in parse_qs(parts.query, keep_blank_values=True).items():
         for value in values:
@@ -129,6 +131,7 @@ def _canonical_query_string(url: str) -> str:
             encoded_value = quote(value, safe='-_.~')
             queries.append((encoded_key, encoded_value))
 
+    # ... then sorted by keys, followed by value
     queries.sort()
 
     return '&'.join(f'{k}={v}' for k, v in queries)
