@@ -29,6 +29,7 @@ def main():
         if not match:
             print("Error: Could not find version in pyproject.toml", file=sys.stderr)
             sys.exit(1)
+        assert match is not None
         current_version = match.group(1)
 
     new_version = bump_version(current_version, bump_type)
