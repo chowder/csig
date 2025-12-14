@@ -1,5 +1,5 @@
 [project]
-name = "sig"
+name = "csig"
 version = "0.1.0"
 description = "Implementation of AWS Signature Version 4"
 readme = "README.md"

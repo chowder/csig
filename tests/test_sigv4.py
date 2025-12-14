@@ -7,7 +7,7 @@ from botocore.auth import SigV4Auth, S3SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials
 
-from sig.sigv4 import SigV4Signer, Service
+from csig.sigv4 import SigV4Signer, Service
 
 Headers = Dict[str, Any]
 

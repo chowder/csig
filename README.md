@@ -170,7 +170,7 @@ headers = signer.create_headers(
 ## Implementation
 
 ```python
-from sig import SigV4Signer, Service
+from csig import SigV4Signer, Service
 
 signer = SigV4Signer(
     access_key='AKIAIOSFODNN7EXAMPLE',
