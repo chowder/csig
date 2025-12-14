@@ -1,8 +1,3 @@
-"""
-Unit tests for SigV4 implementation.
-Validates standalone implementation against botocore.
-"""
-
 import json
 import unittest
 from typing import Any, Dict, Optional, Union
@@ -16,14 +11,12 @@ from sig.sigv4 import SigV4Signer, Service
 
 Headers = Dict[str, Any]
 
-# Fixed timestamp for deterministic testing
 FIXED_TIME = '2023-12-15 12:00:00'
 
 
 class TestSigV4Implementation(unittest.TestCase):
-    """Test SigV4 implementation against botocore."""
-
-    # Test credentials from AWS documentation
+    # Using test credentials from AWS documentation so that we can compare the output at each step against the docs.
+    # see: https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
     ACCESS_KEY = 'AKIAIOSFODNN7EXAMPLE'
     SECRET_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
     REGION = 'us-east-1'
@@ -141,7 +134,7 @@ class TestSigV4Implementation(unittest.TestCase):
     @freeze_time(FIXED_TIME)
     def test_query_string_sorting(self) -> None:
         method = 'GET'
-        # Intentionally unsorted query parameters
+        # unsorted query parameters
         url = 'https://example.us-east-1.amazonaws.com/test?zebra=1&apple=2&banana=3'
 
         standalone = self._sign(method, url, Service.STS)
@@ -154,8 +147,8 @@ class TestSigV4Implementation(unittest.TestCase):
         method = 'GET'
         url = 'https://example.us-east-1.amazonaws.com/test'
         headers = {
-            'Content-Type': '  application/json  ',  # Extra whitespace
-            'X-Custom-Header': 'value   with   spaces'  # Multiple spaces
+            'Content-Type': '  application/json  ',
+            'X-Custom-Header': 'value   with   spaces',
         }
 
         standalone = self._sign(method, url, Service.EC2, headers.copy())
