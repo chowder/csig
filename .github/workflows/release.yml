@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+
+    - name: Set up Python
+      run: uv python install 3.8
+
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Bump version
+      id: bump
+      run: python3 scripts/bump_version.py ${{ github.event.inputs.bump_type }}
+
+    - name: Commit version bump
+      run: |
+        git add pyproject.toml csig/__init__.py
+        git commit -m "Bump version to ${{ steps.bump.outputs.new_version }}"
+
+    - name: Install dependencies
+      run: uv sync
+
+    - name: Run ruff
+      run: uv run ruff check .
+
+    - name: Run type check
+      run: uv run ty check .
+
+    - name: Run tests
+      run: uv run python -m tests.test_sigv4
+
+    - name: Build wheel
+      run: uv build --wheel
+
+    - name: Verify build artifacts created
+      run: |
+        ls -lh dist/
+        test -f dist/csig-${{ steps.bump.outputs.new_version }}-py3-none-any.whl
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
+
+    - name: Create and push tag
+      run: |
+        git tag -a "v${{ steps.bump.outputs.new_version }}" -m "Release version ${{ steps.bump.outputs.new_version }}"
+        git push origin main
+        git push origin "v${{ steps.bump.outputs.new_version }}"
+
+    - name: Release summary
+      run: |
+        echo "======================================"
+        echo "Release completed successfully"
+        echo "Previous version: ${{ steps.bump.outputs.current_version }}"
+        echo "New version: ${{ steps.bump.outputs.new_version }}"
+        echo "Tag: v${{ steps.bump.outputs.new_version }}"
+        echo "======================================"
