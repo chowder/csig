@@ -14,9 +14,12 @@ on:
 
 jobs:
   release:
+    needs: [CI]
     runs-on: ubuntu-latest
+    environment: pypi
     permissions:
       contents: write
+      id-token: write
 
     steps:
     - uses: actions/checkout@v4
@@ -43,18 +46,6 @@ jobs:
         git add pyproject.toml csig/__init__.py
         git commit -m "Bump version to ${{ steps.bump.outputs.new_version }}"
 
-    - name: Install dependencies
-      run: uv sync
-
-    - name: Run ruff
-      run: uv run ruff check .
-
-    - name: Run type check
-      run: uv run ty check .
-
-    - name: Run tests
-      run: uv run python -m tests.test_sigv4
-
     - name: Build wheel
       run: uv build --wheel
 
@@ -65,8 +56,6 @@ jobs:
 
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
 
     - name: Create and push tag
       run: |
